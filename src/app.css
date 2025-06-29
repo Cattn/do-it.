@@ -87,3 +87,11 @@ html {
 		--m3-font: 'Roboto Flex', sans-serif;
 	}
 }
+
+html {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	overflow: -moz-scrollbars-none;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-color: transparent transparent;
+}
