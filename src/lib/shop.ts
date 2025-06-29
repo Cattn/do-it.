@@ -6,7 +6,7 @@ export const SHOP_ITEMS = [
         name: 'Basic Pencil',
         key: 'basic-pencil',
         description: 'A basic pencil. You can write pretty slowly with it.',
-        price: 10,
+        basePrice: 10,
         pMultiplier: 1.1,
         limit: 10
     },
@@ -15,20 +15,23 @@ export const SHOP_ITEMS = [
         key: 'starter-pen',
         description: 'A starter pen. Your writing looks a bit better with it.',
         basePrice: 1000,
-        pMultiplier: 2
+        pMultiplier: 1.3,
+        limit: 10
     },
     {
         name: 'Advanced Pencil',
         key: 'advanced-pencil',
         description: 'An advanced pencil. You can write pretty fast with it.',
         basePrice: 10000,
-        pMultiplier: 3
+        pMultiplier: 1.5,
+        limit: 10
     },
     {
         name: 'Advanced Pen',
         key: 'advanced-pen',
         description: 'An advanced pen. Your writing looks a lot better with it.',
         basePrice: 100000,
-        pMultiplier: 4
+        pMultiplier: 1.7,
+        limit: 10
     }
 ];

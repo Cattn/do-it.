@@ -1,5 +1,81 @@
 <script lang="ts">
+    import { SHOP_ITEMS } from '$lib/shop';
+    import { onMount } from 'svelte';
+    import { gameStore } from '$lib/store.svelte';
+    import { Button } from 'm3-svelte';
 
+    let papers = $state(0);
+    let tasks = $state(0);
+    let storesReady = $state(false);
+    let shopData = $state<Array<{
+        item: typeof SHOP_ITEMS[0],
+        owned: boolean,
+        level: number,
+        currentPrice: number,
+        isMaxLevel: boolean
+    }>>([]);
+
+    onMount(async () => {
+        await waitForStores();
+        await loadGameData();
+    });
+
+    async function waitForStores() {
+        while (true) {
+            try {
+                await gameStore.getPapers();
+                storesReady = true;
+                break;
+            } catch (error) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+    }
+
+    async function loadGameData() {
+        papers = await gameStore.getPapers();
+        tasks = await gameStore.getTasks();
+        
+        const data = await Promise.all(
+            SHOP_ITEMS.map(async (item) => {
+                const owned = await gameStore.getShopItem(item.key);
+                const level = await gameStore.getUpgradeLevel(item.key);
+                const isMaxLevel = level >= item.limit;
+                const currentPrice = calculatePrice(item.basePrice, level, item.pMultiplier);
+                
+                return {
+                    item,
+                    owned,
+                    level,
+                    currentPrice,
+                    isMaxLevel
+                };
+            })
+        );
+        
+        shopData = data;
+    }
+
+    function calculatePrice(basePrice: number, level: number, multiplier: number) {
+        return Math.floor(basePrice * Math.pow(multiplier, level));
+    }
+
+    async function purchaseItem(itemKey: string, price: number, isMaxLevel: boolean = false) {
+        if (papers >= price && !isMaxLevel) {
+            await gameStore.setPapers(papers - price);
+            await gameStore.purchaseUpgrade(itemKey);
+            await loadGameData();
+        }
+    }
+
+    function canAfford(price: number) {
+        return papers >= price;
+    }
+
+    async function addPaper() {
+        await gameStore.addPapers(1);
+        await loadGameData();
+    }
 </script>
 
 
@@ -13,8 +89,11 @@
     </div>
 
 
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div class="bg-secondary-container ml-10 mr-10 mt-10 w-1/3 pb-5 rounded-t-3xl items-center flex justify-center flex-col">
-        <div class="w-46 h-62 bg-secondary rounded-md mb-40 rotate-20 flex items-center justify-center drop-shadow-lg hover:shadow-xl hover:scale-105 active:shadow-none active:scale-95 transition-all duration-100">
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div onclick={addPaper} class="w-46 h-62 bg-secondary rounded-md mb-40 rotate-20 flex items-center justify-center drop-shadow-lg hover:shadow-xl hover:scale-105 active:shadow-none active:scale-95 transition-all duration-100">
             <div class="rounded-full bg-primary-container w-14 h-14 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" class="text-on-primary-container">
                     <path fill="currentColor" d="m12 13.4l-2.917 2.925q-.277.275-.704.275t-.704-.275q-.275-.275-.275-.7t.275-.7L10.6 12L7.675 9.108Q7.4 8.831 7.4 8.404t.275-.704q.275-.275.7-.275t.7.275L12 10.625L14.892 7.7q.277-.275.704-.275t.704.275q.3.3.3.713t-.3.687L13.375 12l2.925 2.917q.275.277.275.704t-.275.704q-.3.3-.712.3t-.688-.3z" />
@@ -30,8 +109,59 @@
     <div class="bg-secondary-container mt-10 w-1/3 pb-5 rounded-tl-3xl ml-10">
         <div class="flex flex-col">
             <h1 class="text-on-primary-fixed title-text">Shop</h1>
+            {#if storesReady}
+                <div class="text-center mb-4">
+                    <p class="text-on-surface-variant">Papers: {papers}</p>
+                    <p class="text-on-surface-variant">Tasks: {tasks}</p>
+                </div>
+            {/if}
         </div>
         <hr class="border-on-secondary-container border-2">
+        
+        {#if !storesReady}
+            <div class="flex justify-center items-center p-8">
+                <p class="text-on-surface-variant">Loading...</p>
+            </div>
+        {:else}
+            <div class="flex flex-col gap-4 p-4">
+                {#each shopData as { item, owned, level, currentPrice, isMaxLevel }}
+                    <div class="bg-surface-container-low p-4 rounded-lg">
+                        <div class="flex flex-col gap-2">
+                            <h2 class="text-on-surface font-bold text-lg">
+                                {item.name}
+                                <span class="text-primary text-sm">(Level {level}/{item.limit})</span>
+                            </h2>
+                            
+                            <p class="text-on-surface-variant text-sm">{item.description}</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-on-surface font-medium">
+                                    {#if isMaxLevel}
+                                        Max Level
+                                    {:else}
+                                        {currentPrice} papers
+                                    {/if}
+                                </span>
+                                
+                                <Button 
+                                    variant={canAfford(currentPrice) && !isMaxLevel ? "filled" : "outlined"}
+                                    disabled={!canAfford(currentPrice) || isMaxLevel}
+                                    click={() => purchaseItem(item.key, currentPrice, isMaxLevel)}
+                                >
+                                    {#if isMaxLevel}
+                                        Maxed
+                                    {:else if level > 0}
+                                        Upgrade
+                                    {:else}
+                                        Buy
+                                    {/if}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {/if}
     </div>
 </div>
 
