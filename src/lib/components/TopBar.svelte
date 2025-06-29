@@ -4,10 +4,35 @@
     // WHY... do I have to add this completely random button that is from a random project, does nothing, can even be HIDDEN, just to get a random error to go away?
     // literally, WHY does causing a random hydration mismatch fix this?
     // who knows bro
-    import { Button } from "m3-svelte";
+    import { Button, ConnectedButtons, TogglePrimitive } from "m3-svelte";
+    import { curPage } from '$lib/store.svelte';
+    import { goto } from '$app/navigation';
+    import { page } from '$app/state';
+
+    $effect(() => {
+        if (curPage.gamePage && curPage.taskPage) {
+            if (page.url.pathname.includes('game')) {
+                curPage.gamePage = false;
+                goto('/');
+            } else {
+                curPage.taskPage = false;
+                goto('/game');
+            }
+        } else if (curPage.gamePage) {
+            goto('/game');
+        } else if (curPage.taskPage) {
+            goto('/');
+        } else {
+            if (page.url.pathname.includes('game') && !curPage.gamePage) {
+                curPage.gamePage = true;
+            } else if (page.url.pathname === '/' && !curPage.taskPage) {
+                curPage.taskPage = true;
+            }
+        }
+    });
 </script>
 
-<div class="mt-4 ml-5 justify-between flex mr-5">
+<div class="mt-4 ml-5 mr-5 grid grid-cols-3 items-center">
     <Button class="hidden" variant="tonal" iconType="none" onclick={() => {}}> <!-- said random button bruh -->
         <svg width="16" height="16" viewBox="0 0 59 59" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_845_2368)">
@@ -21,9 +46,9 @@
         </svg>
         <span class="text-on-secondary-container roboto-flex-home-text text-xs">/ home</span>
     </Button>
-    <div class="big-button">
+    <div class="big-button justify-self-start">
         <Button variant="filled" iconType="left">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...$$props}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M12 14.975q-.2 0-.375-.062T11.3 14.7l-4.6-4.6q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l3.9 3.9l3.9-3.9q.275-.275.7-.275t.7.275t.275.7t-.275.7l-4.6 4.6q-.15.15-.325.213t-.375.062" />
             </svg>
             <span class="text-2xl font-bold button-text">
@@ -31,9 +56,15 @@
             </span>
         </Button>
     </div>
-    <div class="big-button-2">
+    <div class="justify-self-center items-center">
+        <ConnectedButtons>
+            <TogglePrimitive variant="tonal" bind:toggle={curPage.taskPage}>Tasks</TogglePrimitive>
+            <TogglePrimitive variant="tonal" bind:toggle={curPage.gamePage}>Play</TogglePrimitive>
+        </ConnectedButtons>
+    </div>
+    <div class="big-button-2 justify-self-end">
         <Button variant="filled">
-            <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" {...$$props}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 18q-.425 0-.712-.288T3 17t.288-.712T4 16h16q.425 0 .713.288T21 17t-.288.713T20 18zm0-5q-.425 0-.712-.288T3 12t.288-.712T4 11h16q.425 0 .713.288T21 12t-.288.713T20 13zm0-5q-.425 0-.712-.288T3 7t.288-.712T4 6h16q.425 0 .713.288T21 7t-.288.713T20 8z" />
             </svg>
         </Button>

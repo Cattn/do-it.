@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { SplitButton, SliderTicks, Button } from "m3-svelte";
 	import Task from "$lib/components/Task.svelte";
-    import type { Task as TaskType } from "$lib/types";
+    import TaskList from "$lib/components/TaskList.svelte";
+    import type { Task as TaskType, TaskList as TaskListType, ListItem as ListItemType } from "$lib/types";
     import { v4 as uuidv4 } from 'uuid';
 
     let sampleTask: TaskType = {
@@ -44,6 +45,32 @@
         sampleTask4,
     ]);
 
+    let taskList = $derived({
+        id: uuidv4(),
+        title: "Task List",
+        tasks: [
+            {
+                description: "Task 1",
+                checked: false
+            },
+            {
+                description: "Task 2",
+                checked: false
+            },
+            {
+                description: "Task 3",
+                checked: false
+            },
+            {
+                description: "Task 4",
+                checked: false
+            }
+        ],
+        uploadedAt: new Date(),
+        reward: 1,
+        completed: false
+    });
+
     function handleComplete(task: TaskType) {
         tasks = tasks.map(t => t.id === task.id ? { ...t, completed: true } : t);
     }
@@ -57,7 +84,7 @@
     }
 </script>
 
-<div class="bg-secondary-container mt-10 mx-5 h-screen rounded-t-3xl">
+<div class="bg-secondary-container mt-10 mx-5 pb-5 rounded-t-3xl">
     <div class="grid grid-cols-3 mx-4">
         <div class="big-split-button pt-4">
             <SplitButton click={() => {alert("hi")}} variant="elevated">
@@ -96,22 +123,36 @@
             </Button> 
         </div>
     </div>
-
-    <div class="w-3/5 ml-4">
-        <div class="col-span-1 grid grid-cols-2 gap-4">
-            {#each tasks as task}
-                {#if !task.completed}
-                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
-                {/if}
-            {/each}
+    <div class="flex flex-row">
+        <div class="w-3/5 ml-4">
+            <div class="col-span-1 grid grid-cols-2 gap-4">
+                {#each tasks as task}
+                    {#if !task.completed}
+                        <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
+                    {/if}
+                {/each}
+            </div>
         </div>
-        <hr class="my-4" />
-        <div class="col-span-1 grid grid-cols-2 gap-4 mt-4">
-            {#each tasks as task}
-                {#if task.completed}
-                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
-                {/if}
-            {/each}
+
+        <div class="w-2/5 ml-4 flex flex-row">
+            <div class="w-px h-full bg-primary ml-6"></div>
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6 ml-6">
+                <TaskList taskList={taskList} />
+                <TaskList taskList={taskList} />
+                <TaskList taskList={taskList} />
+            </div>
+        </div>
+    </div>
+    <hr class="my-4 ml-4" />
+    <div class="flex flex-row">
+        <div class="w-3/5 ml-4">
+            <div class="col-span-1 grid grid-cols-2 gap-4 mt-4">
+                {#each tasks as task}
+                    {#if task.completed}
+                        <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
+                    {/if}
+                {/each}
+            </div>
         </div>
     </div>
 </div>

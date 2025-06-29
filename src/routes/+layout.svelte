@@ -4,6 +4,9 @@
 	import TopBar from '$lib/components/TopBar.svelte';
 	import { onMount } from 'svelte';
 	import { setup } from '$lib/setup.svelte';
+	import { curPage } from '$lib/store.svelte';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 
 	let { children } = $props();
 
@@ -19,9 +22,16 @@
 	});
 
 	$effect(() => {
+		curPage.gamePage = page.url.pathname.includes('game');
+		curPage.taskPage = page.url.pathname === '/';
+	});
+
+	$effect(() => {
 		console.log(tasksStore);
 		console.log(taskListsStore);
 		console.log(pointsStore);
+		console.log(curPage.gamePage);
+		console.log(curPage.taskPage);
 	});
 </script>     
 

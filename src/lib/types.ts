@@ -16,8 +16,7 @@ export interface TaskList {
     id: string;
     title: string;
     tasks: ListItem[];
-    createdAt: Date;
-    updatedAt: Date;
+    uploadedAt: Date;
     reward: number;
     completed: boolean;
 }
