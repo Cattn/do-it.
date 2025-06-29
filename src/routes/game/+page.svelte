@@ -1,6 +1,6 @@
 <script lang="ts">
     import { SHOP_ITEMS } from '$lib/shop';
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { gameStore } from '$lib/store.svelte';
     import { Button } from 'm3-svelte';
 
@@ -14,11 +14,46 @@
         currentPrice: number,
         isMaxLevel: boolean
     }>>([]);
+    let currentPapersPerSecond = $state(0);
+    let papersPerSecondTimer: number;
+    let isAnimating = $state(false);
 
     onMount(async () => {
         await waitForStores();
         await loadGameData();
+
+        papersPerSecondTimer = setInterval(async () => {
+            currentPapersPerSecond = await calculateTotalPapersPerSecond();
+            if (currentPapersPerSecond > 0) {
+                await gameStore.addPapers(Math.round(currentPapersPerSecond));
+                papers = await gameStore.getPapers();
+
+                isAnimating = true;
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 300);
+            }
+        }, 1000);
     });
+
+    onDestroy(() => {
+        if (papersPerSecondTimer) {
+            clearInterval(papersPerSecondTimer);
+        }
+    });
+
+    async function calculateTotalPapersPerSecond() {
+        let total = 0;
+        for (const item of SHOP_ITEMS) {
+            const level = await gameStore.getUpgradeLevel(item.key);
+            if (level > 0) {
+                const itemPps = item.pps * level * Math.pow(item.ppsMultiplier, level - 1);
+                total += itemPps;
+            }
+        }
+        return Math.round(total);
+    }
+
 
     async function waitForStores() {
         while (true) {
@@ -35,6 +70,7 @@
     async function loadGameData() {
         papers = await gameStore.getPapers();
         tasks = await gameStore.getTasks();
+        currentPapersPerSecond = await calculateTotalPapersPerSecond();
         
         const data = await Promise.all(
             SHOP_ITEMS.map(async (item) => {
@@ -93,7 +129,10 @@
     <div class="bg-secondary-container ml-10 mr-10 mt-10 w-1/3 pb-5 rounded-t-3xl items-center flex justify-center flex-col">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div onclick={addPaper} class="w-46 h-62 bg-secondary rounded-md mb-40 rotate-20 flex items-center justify-center drop-shadow-lg hover:shadow-xl hover:scale-105 active:shadow-none active:scale-95 transition-all duration-100">
+            <div 
+                onclick={addPaper} 
+                class="w-46 h-62 bg-secondary rounded-md mb-40 rotate-20 flex items-center justify-center drop-shadow-lg hover:shadow-xl hover:scale-105 active:shadow-none active:scale-95 transition-all duration-100 {isAnimating ? 'animate-pulse scale-110 shadow-2xl' : ''}"
+            >            
             <div class="rounded-full bg-primary-container w-14 h-14 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" class="text-on-primary-container">
                     <path fill="currentColor" d="m12 13.4l-2.917 2.925q-.277.275-.704.275t-.704-.275q-.275-.275-.275-.7t.275-.7L10.6 12L7.675 9.108Q7.4 8.831 7.4 8.404t.275-.704q.275-.275.7-.275t.7.275L12 10.625L14.892 7.7q.277-.275.704-.275t.704.275q.3.3.3.713t-.3.687L13.375 12l2.925 2.917q.275.277.275.704t-.275.704q-.3.3-.712.3t-.688-.3z" />
@@ -101,7 +140,9 @@
             </div>
         </div>
         <div class="justify-center flex flex-col neg-margin-top">
-            <h1 class="text-on-surface-variant text-lg">20 papers/s</h1>
+            <h1 class="text-on-surface-variant text-lg">
+                {Math.round(currentPapersPerSecond)} papers/s
+            </h1>
         </div>
     </div>
 
@@ -111,7 +152,7 @@
             <h1 class="text-on-primary-fixed title-text">Shop</h1>
             {#if storesReady}
                 <div class="text-center mb-4">
-                    <p class="text-on-surface-variant">Papers: {papers}</p>
+                    <p class="text-on-surface-variant">Papers: {Math.round(papers)}</p>
                     <p class="text-on-surface-variant">Tasks: {tasks}</p>
                 </div>
             {/if}

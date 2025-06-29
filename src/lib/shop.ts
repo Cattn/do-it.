@@ -8,7 +8,9 @@ export const SHOP_ITEMS = [
         description: 'A basic pencil. You can write pretty slowly with it.',
         basePrice: 10,
         pMultiplier: 1.1,
-        limit: 10
+        limit: 10,
+        pps: 1,
+        ppsMultiplier: 1.1
     },
     {
         name: 'Starter Pen',
@@ -16,7 +18,9 @@ export const SHOP_ITEMS = [
         description: 'A starter pen. Your writing looks a bit better with it.',
         basePrice: 1000,
         pMultiplier: 1.3,
-        limit: 10
+        limit: 10,
+        pps: 5,
+        ppsMultiplier: 1.2
     },
     {
         name: 'Advanced Pencil',
@@ -24,7 +28,9 @@ export const SHOP_ITEMS = [
         description: 'An advanced pencil. You can write pretty fast with it.',
         basePrice: 10000,
         pMultiplier: 1.5,
-        limit: 10
+        limit: 10,
+        pps: 100,
+        ppsMultiplier: 1.3
     },
     {
         name: 'Advanced Pen',
@@ -32,6 +38,8 @@ export const SHOP_ITEMS = [
         description: 'An advanced pen. Your writing looks a lot better with it.',
         basePrice: 100000,
         pMultiplier: 1.7,
-        limit: 10
+        limit: 10,
+        pps: 500,
+        ppsMultiplier: 1.4
     }
 ];
