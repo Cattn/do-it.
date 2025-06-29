@@ -11,13 +11,52 @@
         uploadedAt: new Date(),
         completed: false
     }
+    let sampleTask2: TaskType = {
+        id: "2",
+        title: "Task 2",
+        description: "Description 2",
+        reward: 10,
+        uploadedAt: new Date(),
+        completed: false
+    }
+    let sampleTask3: TaskType = {
+        id: "3",
+        title: "Task 3",
+        description: "Description 3",
+        reward: 10,
+        uploadedAt: new Date(),
+        completed: false
+    }
+    let sampleTask4: TaskType = {
+        id: "4",
+        title: "Task 4",
+        description: "Description 4",
+        reward: 10,
+        uploadedAt: new Date(),
+        completed: false
+    }
+
+    let tasks = $state<TaskType[]>([
+        sampleTask,
+        sampleTask2,
+        sampleTask3,
+        sampleTask4,
+    ]);
+
+    function handleComplete(task: TaskType) {
+        tasks = tasks.map(t => t.id === task.id ? { ...t, completed: true } : t);
+    }
+
+    function handleDelete(task: TaskType) {
+        tasks = tasks.filter(t => t.id !== task.id);
+    }
 </script>
 
 <div class="bg-secondary-container mt-10 mx-5 h-screen rounded-t-3xl">
     <div class="grid grid-cols-3 mx-4">
         <div class="big-split-button pt-4">
             <SplitButton click={() => {alert("hi")}} variant="elevated">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" {...$$props}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M4 21q-.425 0-.712-.288T3 20v-2.425q0-.4.15-.763t.425-.637L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.437.65T21 6.4q0 .4-.138.763t-.437.662l-12.6 12.6q-.275.275-.638.425t-.762.15zM17.6 7.8L19 6.4L17.6 5l-1.4 1.4z" />
                     </svg>
                     Create Task
@@ -46,7 +85,7 @@
         </div>
         <div class="big-normal-button pt-4 justify-self-end">
             <Button click={() => {alert("hi")}} variant="filled">
-                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" {...$$props}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2" />
                 </svg>
             </Button> 
@@ -55,11 +94,19 @@
 
     <div class="w-3/5 ml-4">
         <div class="col-span-1 grid grid-cols-2 gap-4">
-            <Task task={sampleTask} />
-            <Task task={sampleTask} />
-            <Task task={sampleTask} />
-            <Task task={sampleTask} />
-            <Task task={sampleTask} />
+            {#each tasks as task}
+                {#if !task.completed}
+                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} />
+                {/if}
+            {/each}
+        </div>
+        <hr class="my-4" />
+        <div class="col-span-1 grid grid-cols-2 gap-4 mt-4">
+            {#each tasks as task}
+                {#if task.completed}
+                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} />
+                {/if}
+            {/each}
         </div>
     </div>
 </div>
