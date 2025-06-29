@@ -3,11 +3,36 @@
 	import Task from "$lib/components/Task.svelte";
     import TaskList from "$lib/components/TaskList.svelte";
     import type { Task as TaskType, TaskList as TaskListType, ListItem as ListItemType } from "$lib/types";
-    import { taskStore, taskListStore } from "$lib/store.svelte";
+    import { taskStore, taskListStore, gameStore } from "$lib/store.svelte";
     import { v4 as uuidv4 } from 'uuid';
+    import { onMount } from "svelte";
 
     let showCreateTaskModal = $state(false);
     let showCreateListModal = $state(false);
+    let storesReady = $state(false);
+
+    let points = $state(0);
+
+    async function loadGameData() {
+        points = await gameStore.getPoints();
+    }
+
+    onMount(async () => {
+        await waitForStores();
+        await loadGameData();
+    });
+
+    async function waitForStores() {
+        while (true) {
+            try {
+                await gameStore.getPoints();
+                storesReady = true;
+                break;
+            } catch (error) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+    }
     
     let newTask = $state<Partial<TaskType>>({
         title: "",
@@ -23,6 +48,7 @@
 
     async function handleComplete(task: TaskType) {
         await taskStore.complete(task.id);
+        await gameStore.addPoints(task.reward);
     }
 
     async function handleDelete(task: TaskType) {
@@ -115,6 +141,8 @@
     async function handleTaskListUpdate(taskList: TaskListType) {
         await taskListStore.update(taskList);
     }
+
+    let sliderValue = $derived(points);
 </script>
 
 <div class="bg-secondary-container mt-10 mx-5 pb-5 rounded-t-3xl">
@@ -143,7 +171,11 @@
                     0
                 </span>
                 <div class="w-full slider-stuff">
-                    <SliderTicks showValue min={0} max={4} step={1} value={2} disabled />
+                    {#if storesReady}
+                        {#key points}
+                            <SliderTicks showValue min={0} max={4} step={1} value={sliderValue} disabled />
+                        {/key}
+                    {/if}
                 </div>
                 <span class="text-on-secondary-fixed ml-2">
                     4
@@ -151,7 +183,7 @@
             </div>
             <div class="flex flex-row items-center justify-center">
                 <span class="text-on-secondary-fixed mr-2 text-sm">
-                    2 Tasks to Reward
+                    {4 - points} Points to Reward
                 </span>
             </div>
         </div>

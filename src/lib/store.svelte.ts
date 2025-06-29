@@ -17,6 +17,7 @@ let tasksStore: IDBStore | null = null;
 let taskListsStore: IDBStore | null = null;
 let papersStore: IDBStore | null = null;
 let tasksGameStore: IDBStore | null = null;
+let pointsStore: IDBStore | null = null;
 let multipliersStore: IDBStore | null = null;
 let shopStore: IDBStore | null = null;
 
@@ -25,6 +26,7 @@ export function initializeStores(
 	taskListsStoreRef: IDBStore,
 	papersStoreRef: IDBStore,
 	tasksGameStoreRef: IDBStore,
+	pointsStoreRef: IDBStore,
 	multipliersStoreRef: IDBStore,
 	shopStoreRef: IDBStore,
 	initialTasks: Task[],
@@ -34,6 +36,7 @@ export function initializeStores(
 	taskListsStore = taskListsStoreRef;
 	papersStore = papersStoreRef;
 	tasksGameStore = tasksGameStoreRef;
+	pointsStore = pointsStoreRef;
 	multipliersStore = multipliersStoreRef;
 	shopStore = shopStoreRef;
 
@@ -284,6 +287,26 @@ export const gameStore = {
 	async subtractTasks(amount: number) {
 		const current = await this.getTasks();
 		await this.setTasks(Math.max(0, current - amount));
+	},
+
+	async getPoints() {
+		if (!pointsStore) throw new Error('Points store not initialized');
+		return (await pointsStore.get('count')) as number || 0;
+	},
+
+	async setPoints(amount: number) {
+		if (!pointsStore) throw new Error('Points store not initialized');
+		await pointsStore.set('count', amount);
+	},
+
+	async addPoints(amount: number) {
+		const current = await this.getPoints();
+		await this.setPoints(current + amount);
+	},
+
+	async subtractPoints(amount: number) {
+		const current = await this.getPoints();
+		await this.setPoints(Math.max(0, current - amount));
 	},
 
 	async getMultiplier(key: string) {

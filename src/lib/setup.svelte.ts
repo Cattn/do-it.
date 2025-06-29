@@ -86,10 +86,14 @@ export const setup = async () => {
                 if (!db.objectStoreNames.contains('shop')) {
                     db.createObjectStore('shop');
                 }
+                if (!db.objectStoreNames.contains('points')) {
+                    db.createObjectStore('points');
+                }
             }
         });
         const papersStore = IDB.store(Promise.resolve(gameDB), 'papers');
         const tasksGameStore = IDB.store(Promise.resolve(gameDB), 'tasks');
+        const pointsStore = IDB.store(Promise.resolve(gameDB), 'points');
         const multipliersStore = IDB.store(Promise.resolve(gameDB), 'multipliers');
         const shopStore = IDB.store(Promise.resolve(gameDB), 'shop');
 
@@ -101,6 +105,7 @@ export const setup = async () => {
             taskListsStore,
             papersStore,
             tasksGameStore,
+            pointsStore,
             multipliersStore,
             shopStore,
             initialTasks,

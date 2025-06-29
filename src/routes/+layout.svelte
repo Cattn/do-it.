@@ -13,6 +13,7 @@
 	let taskListsStore = $state();
 	let papersStore = $state();
 	let tasksGameStore = $state();
+	let pointsStore = $state();
 	let multipliersStore = $state();
 	let shopStore = $state();
 
@@ -24,6 +25,7 @@
 			tasksGameStore: tgs,
 			multipliersStore: ms,
 			shopStore: ss,
+			pointsStore: pts,
 			initialTasks,
 			initialTaskLists
 		} = await setup();
@@ -34,24 +36,14 @@
 		tasksGameStore = tgs;
 		multipliersStore = ms;
 		shopStore = ss;
+		pointsStore = pts;
 		
-		initializeStores(ts, tls, ps, tgs, ms, ss, initialTasks, initialTaskLists);
+		initializeStores(ts, tls, ps, tgs, pts, ms, ss, initialTasks, initialTaskLists);
 	});
 
 	$effect(() => {
 		curPage.gamePage = page.url.pathname.includes('game');
 		curPage.taskPage = page.url.pathname === '/';
-	});
-
-	$effect(() => {
-		console.log(tasksStore);
-		console.log(taskListsStore);
-		console.log(papersStore);
-		console.log(tasksGameStore);
-		console.log(multipliersStore);
-		console.log(shopStore);
-		console.log(curPage.gamePage);
-		console.log(curPage.taskPage);
 	});
 </script>     
 
