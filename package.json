@@ -36,6 +36,8 @@
 		"vite-plugin-devtools-json": "^0.2.0"
 	},
 	"dependencies": {
-		"m3-svelte": "^4.5.2"
+		"idb": "^8.0.3",
+		"m3-svelte": "^4.5.2",
+		"uuidv4": "^6.2.13"
 	}
 }

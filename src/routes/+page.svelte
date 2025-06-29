@@ -2,36 +2,37 @@
 	import { SplitButton, SliderTicks, Button } from "m3-svelte";
 	import Task from "$lib/components/Task.svelte";
     import type { Task as TaskType } from "$lib/types";
+    import { v4 as uuidv4 } from 'uuid';
 
     let sampleTask: TaskType = {
-        id: "1",
+        id: uuidv4(),
         title: "Task 1",
         description: "Description 1",
-        reward: 10,
+        reward: 1,
         uploadedAt: new Date(),
         completed: false
     }
     let sampleTask2: TaskType = {
-        id: "2",
+        id: uuidv4(),
         title: "Task 2",
         description: "Description 2",
-        reward: 10,
+        reward: 1,
         uploadedAt: new Date(),
         completed: false
     }
     let sampleTask3: TaskType = {
-        id: "3",
+        id: uuidv4(),
         title: "Task 3",
         description: "Description 3",
-        reward: 10,
+        reward: 1,
         uploadedAt: new Date(),
         completed: false
     }
     let sampleTask4: TaskType = {
-        id: "4",
+        id: uuidv4(),
         title: "Task 4",
         description: "Description 4",
-        reward: 10,
+        reward: 1,
         uploadedAt: new Date(),
         completed: false
     }
@@ -50,6 +51,10 @@
     function handleDelete(task: TaskType) {
         tasks = tasks.filter(t => t.id !== task.id);
     }
+
+    function handleUpdate(task: TaskType) {
+        tasks = tasks.map(t => t.id === task.id ? task : t);
+    }
 </script>
 
 <div class="bg-secondary-container mt-10 mx-5 h-screen rounded-t-3xl">
@@ -66,7 +71,7 @@
             </SplitButton> 
         </div>
         <div class="col-span-1 pt-4 ">
-            <div class="flex flex-row items-center">
+            <div class="flex flex-row items-center">  
                 <span class="text-on-secondary-fixed mr-2">
                     0
                 </span>
@@ -96,7 +101,7 @@
         <div class="col-span-1 grid grid-cols-2 gap-4">
             {#each tasks as task}
                 {#if !task.completed}
-                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} />
+                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
                 {/if}
             {/each}
         </div>
@@ -104,7 +109,7 @@
         <div class="col-span-1 grid grid-cols-2 gap-4 mt-4">
             {#each tasks as task}
                 {#if task.completed}
-                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} />
+                    <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
                 {/if}
             {/each}
         </div>
