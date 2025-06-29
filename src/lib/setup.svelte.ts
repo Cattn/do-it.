@@ -74,12 +74,24 @@ export const setup = async () => {
 
         const gameDB = await openDB('game-manager', 1, {
             upgrade(db) {
-                if (!db.objectStoreNames.contains('points')) {
-                    db.createObjectStore('points');
+                if (!db.objectStoreNames.contains('papers')) {
+                    db.createObjectStore('papers');
+                }
+                if (!db.objectStoreNames.contains('tasks')) {
+                    db.createObjectStore('tasks');
+                }
+                if (!db.objectStoreNames.contains('multipliers')) {
+                    db.createObjectStore('multipliers');
+                }
+                if (!db.objectStoreNames.contains('shop')) {
+                    db.createObjectStore('shop');
                 }
             }
         });
-        const pointsStore = IDB.store(Promise.resolve(gameDB), 'points');
+        const papersStore = IDB.store(Promise.resolve(gameDB), 'papers');
+        const tasksGameStore = IDB.store(Promise.resolve(gameDB), 'tasks');
+        const multipliersStore = IDB.store(Promise.resolve(gameDB), 'multipliers');
+        const shopStore = IDB.store(Promise.resolve(gameDB), 'shop');
 
         const initialTasks = await loadTasksFromIDB(tasksStore);
         const initialTaskLists = await loadTaskListsFromIDB(taskListsStore);
@@ -87,7 +99,10 @@ export const setup = async () => {
         return {
             tasksStore,
             taskListsStore,
-            pointsStore,
+            papersStore,
+            tasksGameStore,
+            multipliersStore,
+            shopStore,
             initialTasks,
             initialTaskLists
         };

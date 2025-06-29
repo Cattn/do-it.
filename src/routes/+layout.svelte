@@ -11,22 +11,31 @@
 
 	let tasksStore = $state();
 	let taskListsStore = $state();
-	let pointsStore = $state();
+	let papersStore = $state();
+	let tasksGameStore = $state();
+	let multipliersStore = $state();
+	let shopStore = $state();
 
 	onMount(async () => {
 		const { 
 			tasksStore: ts, 
 			taskListsStore: tls, 
-			pointsStore: ps,
+			papersStore: ps,
+			tasksGameStore: tgs,
+			multipliersStore: ms,
+			shopStore: ss,
 			initialTasks,
 			initialTaskLists
 		} = await setup();
 		
 		tasksStore = ts;
 		taskListsStore = tls;
-		pointsStore = ps;
+		papersStore = ps;
+		tasksGameStore = tgs;
+		multipliersStore = ms;
+		shopStore = ss;
 		
-		initializeStores(ts, tls, initialTasks, initialTaskLists);
+		initializeStores(ts, tls, ps, tgs, ms, ss, initialTasks, initialTaskLists);
 	});
 
 	$effect(() => {
@@ -37,7 +46,10 @@
 	$effect(() => {
 		console.log(tasksStore);
 		console.log(taskListsStore);
-		console.log(pointsStore);
+		console.log(papersStore);
+		console.log(tasksGameStore);
+		console.log(multipliersStore);
+		console.log(shopStore);
 		console.log(curPage.gamePage);
 		console.log(curPage.taskPage);
 	});
