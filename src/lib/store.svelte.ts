@@ -127,8 +127,19 @@ export const taskListStore = {
 			throw new Error('Task lists store not initialized');
 		}
 		try {
-			await taskListsStore.set(taskList.id, taskList);
-			taskLists.push(taskList);
+			const cleanTaskList: TaskList = {
+				id: taskList.id,
+				title: taskList.title,
+				tasks: taskList.tasks.map(task => ({
+					description: task.description,
+					checked: task.checked
+				})),
+				uploadedAt: taskList.uploadedAt,
+				reward: taskList.reward,
+				completed: taskList.completed
+			};
+			await taskListsStore.set(taskList.id, cleanTaskList);
+			taskLists.push(cleanTaskList);
 		} catch (error) {
 			console.error('Error creating task list:', error);
 			throw error;
@@ -140,10 +151,21 @@ export const taskListStore = {
 			throw new Error('Task lists store not initialized');
 		}
 		try {
-			await taskListsStore.set(updatedTaskList.id, updatedTaskList);
+			const cleanTaskList: TaskList = {
+				id: updatedTaskList.id,
+				title: updatedTaskList.title,
+				tasks: updatedTaskList.tasks.map(task => ({
+					description: task.description,
+					checked: task.checked
+				})),
+				uploadedAt: updatedTaskList.uploadedAt,
+				reward: updatedTaskList.reward,
+				completed: updatedTaskList.completed
+			};
+			await taskListsStore.set(updatedTaskList.id, cleanTaskList);
 			const index = taskLists.findIndex(taskList => taskList.id === updatedTaskList.id);
 			if (index !== -1) {
-				taskLists[index] = updatedTaskList;
+				taskLists[index] = cleanTaskList;
 			}
 		} catch (error) {
 			console.error('Error updating task list:', error);
@@ -158,7 +180,18 @@ export const taskListStore = {
 		try {
 			const taskListIndex = taskLists.findIndex(tl => tl.id === taskListId);
 			if (taskListIndex !== -1) {
-				const completedTaskList = { ...taskLists[taskListIndex], completed: true };
+				const originalTaskList = taskLists[taskListIndex];
+				const completedTaskList: TaskList = {
+					id: originalTaskList.id,
+					title: originalTaskList.title,
+					tasks: originalTaskList.tasks.map(task => ({
+						description: task.description,
+						checked: task.checked
+					})),
+					uploadedAt: originalTaskList.uploadedAt,
+					reward: originalTaskList.reward,
+					completed: true
+				};
 				await taskListsStore.set(taskListId, completedTaskList);
 				taskLists[taskListIndex] = completedTaskList;
 			}
