@@ -1,5 +1,13 @@
-// IRB wrapper wrapper by Cattn - Taken from Bunker Project
+// IRB wrapper wrapper by Cattn - Originally made for the bunker project & modified further here, adding types.
 import { openDB, type IDBPDatabase } from 'idb';
+
+export interface IDBStore {
+	get: (key: string) => Promise<unknown>;
+	set: (key: string, value: unknown) => Promise<unknown>;
+	del: (key: string) => Promise<unknown>;
+	clear: () => Promise<unknown>;
+	keys: () => Promise<IDBValidKey[]>;
+}
 
 export class IDB {
 	public static createKeyval(name: string) {

@@ -4,9 +4,8 @@
 	import TopBar from '$lib/components/TopBar.svelte';
 	import { onMount } from 'svelte';
 	import { setup } from '$lib/setup.svelte';
-	import { curPage } from '$lib/store.svelte';
+	import { curPage, initializeStores } from '$lib/store.svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
 
 	let { children } = $props();
 
@@ -15,10 +14,19 @@
 	let pointsStore = $state();
 
 	onMount(async () => {
-		const { tasksStore: ts, taskListsStore: tls, pointsStore: ps } = await setup();
+		const { 
+			tasksStore: ts, 
+			taskListsStore: tls, 
+			pointsStore: ps,
+			initialTasks,
+			initialTaskLists
+		} = await setup();
+		
 		tasksStore = ts;
 		taskListsStore = tls;
 		pointsStore = ps;
+		
+		initializeStores(ts, tls, initialTasks, initialTaskLists);
 	});
 
 	$effect(() => {

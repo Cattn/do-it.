@@ -65,8 +65,11 @@
                     <Checkbox>
                         <input 
                             type="checkbox" 
-                            bind:checked={taskItem.checked} 
-                            onchange={() => updateTaskItem(index)}
+                            checked={taskItem.checked} 
+                            onchange={(e) => { 
+                                taskItem.checked = (e.target as HTMLInputElement).checked; 
+                                updateTaskItem(index);
+                            }}
                         />
                     </Checkbox>
                     <span class="task-item-text" class:completed={taskItem.checked}>{taskItem.description}</span>
