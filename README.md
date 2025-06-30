@@ -16,6 +16,11 @@
 
 **do it!** isn't just another run-of-the-mill task app. It combines entertainment with productivity. Set your own tasks, outline everything you need to do. Then as you complete your tasks, earn rewards in a cookie-clicker like game for your effort. The more tasks you complete, the more rewards you earn! All wrapped in a sleek, material-3 inspired design.
 
+## How does it work?
+Create tasks, complete them, earn points! For every 4 points you get, you earn a "task". You can then spend tasks to unlock cool upgrades in the game.
+
+In the future, tasks will be worth varying amounts based on the level of "effort" required for a task you set, & special notifications and rewards will be granted upon completion.
+
 ## Roadmap/Plans
 
 - Friends & Server integration
