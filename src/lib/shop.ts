@@ -62,5 +62,32 @@ export const MULTIPLIER_ITEMS = [
         limit: 1,
         multiplier: 1.2,
         type: 'paper'
+    },
+    {
+        name: '1.3x Paper Multiplier',
+        key: '1-3x-paper-multiplier',
+        description: 'A 1.3x paper multiplier. Your papers will be done 1.3x as fast.',
+        basePrice: 5,
+        limit: 1,
+        multiplier: 1.3,
+        type: 'paper'
+    },
+    {
+        name: '50x Click Multiplier',
+        key: '50x-click-multiplier',
+        description: 'A 5x click multiplier. Your papers will be done 50x as fast.',
+        basePrice: 6,
+        limit: 1,
+        multiplier: 50,
+        type: 'click'
+    },
+    {
+        name: '1000x Click Multiplier',
+        key: '100x-click-multiplier',
+        description: 'A 100x click multiplier. Your papers will be done 1000x as fast.',
+        basePrice: 10,
+        limit: 1,
+        multiplier: 1000,
+        type: 'click'
     }
 ]

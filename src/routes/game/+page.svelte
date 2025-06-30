@@ -263,14 +263,14 @@
             </div>
         {:else}
             <div class="flex flex-col gap-4 p-4">
-                {#each shopData as { item, owned, level, currentPrice, isMaxLevel }}
+                {#each shopData.filter(data => !data.isMaxLevel) as { item, owned, level, currentPrice, isMaxLevel }}
                     <div class="bg-surface-container-low p-4 rounded-lg">
                         <div class="flex flex-col gap-2">
                             <h2 class="text-on-surface font-bold text-lg">
                                 {item.name}
                                 <span class="text-primary text-sm">(Level {level}/{item.limit})</span>
                             </h2>
-                            
+                        
                             <p class="text-on-surface-variant text-sm">{item.description}</p>
                             
                             <div class="flex justify-between items-center">
