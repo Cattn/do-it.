@@ -43,3 +43,24 @@ export const SHOP_ITEMS = [
         ppsMultiplier: 1.4
     }
 ];
+
+export const MULTIPLIER_ITEMS = [
+    {
+        name: '10x Click Multiplier',
+        key: '10x-click-multiplier',
+        description: 'A 10x click multiplier. Your papers will be done 10x as fast.',
+        basePrice: 1,
+        limit: 1,
+        multiplier: 10,
+        type: 'click'
+    },
+    {
+        name: '1.2x Paper Multiplier',
+        key: '1-2x-paper-multiplier',
+        description: 'A 1.2x paper multiplier. Your papers will be done 1.2x as fast.',
+        basePrice: 3,
+        limit: 1,
+        multiplier: 1.2,
+        type: 'paper'
+    }
+]

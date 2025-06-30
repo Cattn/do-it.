@@ -33,6 +33,15 @@
             }
         }
     }
+
+    $effect(() => {
+        if (points >= 4) {
+            gameStore.setPoints(0);
+            points = 0;
+            gameStore.addTasks(1);
+            sliderValue = 0;
+        }
+    });
     
     let newTask = $state<Partial<TaskType>>({
         title: "",

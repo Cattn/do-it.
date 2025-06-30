@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { SHOP_ITEMS } from '$lib/shop';
+    import { SHOP_ITEMS, MULTIPLIER_ITEMS } from '$lib/shop';
     import { onMount, onDestroy } from 'svelte';
     import { gameStore } from '$lib/store.svelte';
     import { Button } from 'm3-svelte';
@@ -14,6 +14,11 @@
         currentPrice: number,
         isMaxLevel: boolean
     }>>([]);
+    let multiplierData = $state<Array<{
+        item: typeof MULTIPLIER_ITEMS[0],
+        owned: boolean
+    }>>([]);
+    let purchasedMultipliers = $state<Array<typeof MULTIPLIER_ITEMS[0]>>([]);
     let currentPapersPerSecond = $state(0);
     let papersPerSecondTimer: number;
     let isAnimating = $state(false);
@@ -51,6 +56,16 @@
                 total += itemPps;
             }
         }
+        
+        for (const multiplier of MULTIPLIER_ITEMS) {
+            if (multiplier.type === 'paper') {
+                const owned = await gameStore.getShopItem(multiplier.key);
+                if (owned) {
+                    total *= multiplier.multiplier;
+                }
+            }
+        }
+        
         return Math.round(total);
     }
 
@@ -89,7 +104,19 @@
             })
         );
         
+        const multiplierDataResult = await Promise.all(
+            MULTIPLIER_ITEMS.map(async (item) => {
+                const owned = await gameStore.getShopItem(item.key);
+                return {
+                    item,
+                    owned
+                };
+            })
+        );
+        
         shopData = data;
+        multiplierData = multiplierDataResult.filter(m => !m.owned);
+        purchasedMultipliers = multiplierDataResult.filter(m => m.owned).map(m => m.item);
     }
 
     function calculatePrice(basePrice: number, level: number, multiplier: number) {
@@ -104,12 +131,34 @@
         }
     }
 
-    function canAfford(price: number) {
+    async function purchaseMultiplier(itemKey: string, price: number, type: string) {
+        if (tasks >= price) {
+            await gameStore.setTasks(tasks - price);
+            await gameStore.purchaseShopItem(itemKey);
+            await loadGameData();
+        }
+    }
+
+    function canAfford(price: number, type?: string) {
+        if (type === 'click' || type === 'paper') {
+            return tasks >= price;
+        }
         return papers >= price;
     }
 
     async function addPaper() {
-        await gameStore.addPapers(1);
+        let clickValue = 1;
+        
+        for (const multiplier of MULTIPLIER_ITEMS) {
+            if (multiplier.type === 'click') {
+                const owned = await gameStore.getShopItem(multiplier.key);
+                if (owned) {
+                    clickValue *= multiplier.multiplier;
+                }
+            }
+        }
+        
+        await gameStore.addPapers(Math.round(clickValue));
         await loadGameData();
     }
 </script>
@@ -118,10 +167,48 @@
 
 <div class="flex flex-row">
     <div class="bg-primary-container h-screen mr-10 mt-10 w-1/3 pb-5 rounded-tr-3xl">
-        <div class="flex flex-col">
+        <div class="flex flex-col text-center mb-4">
             <h1 class="text-on-primary-fixed title-text">Multipliers</h1>
+            {#if storesReady}
+                <p class="text-on-surface-variant">Tasks: {tasks}</p>
+            {/if}
         </div>
         <hr class="border-on-primary-container border-2">
+        
+        {#if !storesReady}
+            <div class="flex justify-center items-center p-8">
+                <p class="text-on-surface-variant">Loading...</p>
+            </div>
+        {:else}
+            <div class="flex flex-col gap-4 p-4">
+                {#each multiplierData as { item }}
+                    <div class="bg-surface-container-low p-4 rounded-lg border-2 border-tertiary">
+                        <div class="flex flex-col gap-2">
+                            <h2 class="text-on-surface font-bold text-lg">
+                                {item.name}
+                                <span class="text-tertiary text-sm">(One-time)</span>
+                            </h2>
+                            
+                            <p class="text-on-surface-variant text-sm">{item.description}</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-on-surface font-medium">
+                                    {item.basePrice} tasks
+                                </span>
+                                
+                                <Button 
+                                    variant={canAfford(item.basePrice, item.type) ? "filled" : "outlined"}
+                                    disabled={!canAfford(item.basePrice, item.type)}
+                                    click={() => purchaseMultiplier(item.key, item.basePrice, item.type)}
+                                >
+                                    Buy
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {/if}
     </div>
 
 
@@ -143,6 +230,16 @@
             <h1 class="text-on-surface-variant text-lg">
                 {Math.round(currentPapersPerSecond)} papers/s
             </h1>
+            {#if purchasedMultipliers.length > 0}
+                <div class="mt-4 text-center">
+                    <h2 class="text-on-surface-variant text-sm mb-2">Active Multipliers:</h2>
+                    {#each purchasedMultipliers as multiplier}
+                        <p class="text-on-surface text-xs">
+                            {multiplier.name}
+                        </p>
+                    {/each}
+                </div>
+            {/if}
         </div>
     </div>
 
@@ -153,7 +250,6 @@
             {#if storesReady}
                 <div class="text-center mb-4">
                     <p class="text-on-surface-variant">Papers: {Math.round(papers)}</p>
-                    <p class="text-on-surface-variant">Tasks: {tasks}</p>
                 </div>
             {/if}
         </div>
