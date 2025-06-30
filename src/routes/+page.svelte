@@ -13,13 +13,27 @@
 
     let points = $state(0);
 
+    let showFilterMenu = $state(false);
+    let currentFilter = $state<'all' | 'active' | 'completed'>('all');
+    let sortBy = $state<'date' | 'reward'>('date');
+    let sortOrder = $state<'asc' | 'desc'>('desc');
+
     async function loadGameData() {
         points = await gameStore.getPoints();
     }
 
-    onMount(async () => {
-        await waitForStores();
-        await loadGameData();
+    onMount(() => {
+        async function initializeData() {
+            await waitForStores();
+            await loadGameData();
+        }
+        
+        initializeData();
+        document.addEventListener('click', handleFilterMenuClickOutside);
+        
+        return () => {
+            document.removeEventListener('click', handleFilterMenuClickOutside);
+        };
     });
 
     async function waitForStores() {
@@ -152,6 +166,67 @@
     }
 
     let sliderValue = $derived(points);
+    let filteredActiveTasks = $derived(taskStore.activeTasks.filter(task => {
+        if (currentFilter === 'completed') return false;
+        if (currentFilter === 'active') return !task.completed;
+        return currentFilter === 'all' || !task.completed;
+    }).sort((a, b) => {
+        if (sortBy === 'reward') {
+            return sortOrder === 'asc' ? a.reward - b.reward : b.reward - a.reward;
+        }
+        return sortOrder === 'asc' 
+            ? new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+            : new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+    }));
+
+    let filteredCompletedTasks = $derived(taskStore.completedTasks.filter(task => {
+        if (currentFilter === 'active') return false;
+        if (currentFilter === 'completed') return task.completed;
+        return currentFilter === 'all' || task.completed;
+    }).sort((a, b) => {
+        if (sortBy === 'reward') {
+            return sortOrder === 'asc' ? a.reward - b.reward : b.reward - a.reward;
+        }
+        return sortOrder === 'asc' 
+            ? new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+            : new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+    }));
+
+    let filteredActiveTaskLists = $derived(taskListStore.activeTaskLists.filter(taskList => {
+        if (currentFilter === 'completed') return false;
+        if (currentFilter === 'active') return !taskList.completed;
+        return currentFilter === 'all' || !taskList.completed;
+    }).sort((a, b) => {
+        if (sortBy === 'reward') {
+            return sortOrder === 'asc' ? a.reward - b.reward : b.reward - a.reward;
+        }
+        return sortOrder === 'asc' 
+            ? new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+            : new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+    }));
+
+    let filteredCompletedTaskLists = $derived(taskListStore.completedTaskLists.filter(taskList => {
+        if (currentFilter === 'active') return false;
+        if (currentFilter === 'completed') return taskList.completed;
+        return currentFilter === 'all' || taskList.completed;
+    }).sort((a, b) => {
+        if (sortBy === 'reward') {
+            return sortOrder === 'asc' ? a.reward - b.reward : b.reward - a.reward;
+        }
+        return sortOrder === 'asc' 
+            ? new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+            : new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+    }));
+
+    function toggleFilterMenu() {
+        showFilterMenu = !showFilterMenu;
+    }
+
+    function handleFilterMenuClickOutside(event: MouseEvent) {
+        if (!event.target || !(event.target as Element).closest('.big-normal-button')) {
+            showFilterMenu = false;
+        }
+    }
 </script>
 
 <div class="bg-secondary-container mt-10 mx-5 pb-5 rounded-t-3xl">
@@ -196,18 +271,79 @@
                 </span>
             </div>
         </div>
-        <div class="big-normal-button pt-4 justify-self-end">
-            <Button click={() => {alert("hi")}} variant="filled">
+        <div class="big-normal-button pt-4 justify-self-end relative">
+            <Button click={toggleFilterMenu} variant="filled">
                 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2" />
+                    <path fill="currentColor" d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
                 </svg>
-            </Button> 
+            </Button>
+            {#if showFilterMenu}
+                <div class="filter-menu">
+                    <div class="filter-section">
+                        <h3 class="filter-title">Filter</h3>
+                        <div class="filter-options">
+                            <Button 
+                                variant={currentFilter === 'all' ? 'filled' : 'text'}
+                                click={() => { currentFilter = 'all'; showFilterMenu = false; }}
+                            >
+                                All Tasks
+                            </Button>
+                            <Button 
+                                variant={currentFilter === 'active' ? 'filled' : 'text'}
+                                click={() => { currentFilter = 'active'; showFilterMenu = false; }}
+                            >
+                                Active Only
+                            </Button>
+                            <Button 
+                                variant={currentFilter === 'completed' ? 'filled' : 'text'}
+                                click={() => { currentFilter = 'completed'; showFilterMenu = false; }}
+                            >
+                                Completed Only
+                            </Button>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h3 class="filter-title">Sort By</h3>
+                        <div class="filter-options">
+                            <Button 
+                                variant={sortBy === 'date' ? 'filled' : 'text'}
+                                click={() => { sortBy = 'date'; showFilterMenu = false; }}
+                            >
+                                Date
+                            </Button>
+                            <Button 
+                                variant={sortBy === 'reward' ? 'filled' : 'text'}
+                                click={() => { sortBy = 'reward'; showFilterMenu = false; }}
+                            >
+                                Reward
+                            </Button>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <h3 class="filter-title">Order</h3>
+                        <div class="filter-options">
+                            <Button 
+                                variant={sortOrder === 'desc' ? 'filled' : 'text'}
+                                click={() => { sortOrder = 'desc'; showFilterMenu = false; }}
+                            >
+                                Descending
+                            </Button>
+                            <Button 
+                                variant={sortOrder === 'asc' ? 'filled' : 'text'}
+                                click={() => { sortOrder = 'asc'; showFilterMenu = false; }}
+                            >
+                                Ascending
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
     <div class="flex flex-row">
         <div class="w-3/5 ml-4">
             <div class="col-span-1 grid grid-cols-2 gap-4"> 
-                {#each taskStore.activeTasks as task}
+                {#each filteredActiveTasks as task}
                     <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
                 {/each}
             </div>
@@ -216,7 +352,7 @@
         <div class="w-2/5 ml-4 flex flex-row">
             <div class="w-px h-full bg-primary ml-6"></div>
             <div class="grid grid-cols-2 gap-y-4 gap-x-6 ml-6">
-                {#each taskListStore.activeTaskLists as taskListItem}
+                {#each filteredActiveTaskLists as taskListItem}
                     <TaskList 
                         taskList={taskListItem} 
                         onComplete={handleTaskListComplete}
@@ -231,7 +367,7 @@
     <div class="flex flex-row">
         <div class="w-3/5 ml-4">
             <div class="col-span-1 grid grid-cols-2 gap-4 mt-4">
-                {#each taskStore.completedTasks as task}
+                {#each filteredCompletedTasks as task}
                     <Task task={task} onComplete={handleComplete} onDelete={handleDelete} onUpdate={handleUpdate} />
                 {/each}
             </div>
@@ -239,7 +375,7 @@
         <div class="w-2/5 ml-4 flex flex-row">
             <div class="w-px h-full bg-primary ml-6"></div>
             <div class="grid grid-cols-2 gap-y-4 gap-x-6 ml-6 mt-4">
-                {#each taskListStore.completedTaskLists as taskListItem}
+                {#each filteredCompletedTaskLists as taskListItem}
                     <TaskList 
                         taskList={taskListItem} 
                         onComplete={handleTaskListComplete}
@@ -497,6 +633,64 @@
     .form-textarea:focus {
         outline: none;
         border-color: rgb(var(--m3-scheme-primary));
+    }
+
+    .filter-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: rgb(var(--m3-scheme-surface-container));
+        border-radius: var(--m3-util-rounding-large);
+        box-shadow: var(--m3-util-elevation-2);
+        z-index: 1000;
+        min-width: 200px;
+        margin-top: 8px;
+        padding: 16px;
+        animation: menuEnter 0.2s ease-out;
+    }
+
+    @keyframes menuEnter {
+        from {
+            opacity: 0;
+            transform: translateY(-8px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .filter-section {
+        margin-bottom: 20px;
+    }
+
+    .filter-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-title {
+        font-size: 11px;
+        font-weight: 500;
+        color: rgb(var(--m3-scheme-on-surface-variant));
+        margin: 0 0 12px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: "Roboto Flex", sans-serif;
+    }
+
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-options :global(button) {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
         box-shadow: 0 0 0 3px rgb(var(--m3-scheme-primary) / 0.1);
     }
 
