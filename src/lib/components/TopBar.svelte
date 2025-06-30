@@ -9,6 +9,24 @@
     import { goto } from '$app/navigation';
     import { page } from '$app/state';
 
+    let menuOpen = $state(false);
+
+    $effect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuOpen && event.target instanceof Element) {
+                const menuContainer = event.target.closest('.big-button-2');
+                if (!menuContainer) {
+                    menuOpen = false;
+                }
+            }
+        }
+        
+        if (menuOpen) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    });
+
     $effect(() => {
         if (curPage.gamePage && curPage.taskPage) {
             if (page.url.pathname.includes('game')) {
@@ -47,7 +65,7 @@
         <span class="text-on-secondary-container roboto-flex-home-text text-xs">/ home</span>
     </Button>
     <div class="big-button justify-self-start">
-        <Button variant="filled" iconType="left">
+        <Button click={() => goto('/')} variant="filled" iconType="left">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M12 14.975q-.2 0-.375-.062T11.3 14.7l-4.6-4.6q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l3.9 3.9l3.9-3.9q.275-.275.7-.275t.7.275t.275.7t-.275.7l-4.6 4.6q-.15.15-.325.213t-.375.062" />
             </svg>
@@ -62,12 +80,19 @@
             <TogglePrimitive variant="tonal" bind:toggle={curPage.gamePage}>Play</TogglePrimitive>
         </ConnectedButtons>
     </div>
-    <div class="big-button-2 justify-self-end">
-        <Button variant="filled">
+    <div class="big-button-2 justify-self-end relative">
+        <Button variant="filled" onclick={() => (menuOpen = !menuOpen)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 18q-.425 0-.712-.288T3 17t.288-.712T4 16h16q.425 0 .713.288T21 17t-.288.713T20 18zm0-5q-.425 0-.712-.288T3 12t.288-.712T4 11h16q.425 0 .713.288T21 12t-.288.713T20 13zm0-5q-.425 0-.712-.288T3 7t.288-.712T4 6h16q.425 0 .713.288T21 7t-.288.713T20 8z" />
             </svg>
         </Button>
+        {#if menuOpen}
+            <div class="dropdown-menu">
+                <Button square variant="tonal" onclick={() => { menuOpen = false; goto('/settings'); }}>
+                    Settings
+                </Button>
+            </div>
+        {/if}
     </div>
 </div>
 <style>
@@ -108,5 +133,21 @@
             "YTFI" 738,
             "YTLC" 514,
             "YTUC" 712;
+    }
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 1000;
+        margin-top: 0.5rem;
+        background: rgb(var(--m3-scheme-surface-container));
+        border-radius: var(--m3-util-rounding-small);
+        box-shadow: var(--m3-util-elevation-2);
+        min-width: 8rem;
+        overflow: hidden;
+    }
+
+    .dropdown-menu :global(button) {
+        width: 100%;
     }
 </style>
