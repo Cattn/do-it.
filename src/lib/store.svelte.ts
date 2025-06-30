@@ -11,6 +11,23 @@ export const curPage = {
 	set taskPage(value) { taskPage = value; }
 };
 
+let showPapersPerSecond = $state(true);
+
+export const uiStore = {
+	get showPapersPerSecond() { return showPapersPerSecond; },
+	set showPapersPerSecond(value: boolean) { 
+		showPapersPerSecond = value;
+		localStorage.setItem('showPapersPerSecond', JSON.stringify(value));
+	},
+	
+	initFromLocalStorage() {
+		const saved = localStorage.getItem('showPapersPerSecond');
+		if (saved !== null) {
+			showPapersPerSecond = JSON.parse(saved);
+		}
+	}
+};
+
 const tasks = $state<Task[]>([]);
 const taskLists = $state<TaskList[]>([]);
 let tasksStore: IDBStore | null = null;

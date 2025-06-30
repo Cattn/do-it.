@@ -4,7 +4,7 @@
 	import TopBar from '$lib/components/TopBar.svelte';
 	import { onMount } from 'svelte';
 	import { setup } from '$lib/setup.svelte';
-	import { curPage, initializeStores } from '$lib/store.svelte';
+	import { curPage, initializeStores, uiStore } from '$lib/store.svelte';
 	import { page } from '$app/state';
 
 	let { children } = $props();
@@ -39,6 +39,7 @@
 		pointsStore = pts;
 		
 		initializeStores(ts, tls, ps, tgs, pts, ms, ss, initialTasks, initialTaskLists);
+		uiStore.initFromLocalStorage();
 	});
 
 	$effect(() => {

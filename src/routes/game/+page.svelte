@@ -1,7 +1,7 @@
 <script lang="ts">
     import { SHOP_ITEMS, MULTIPLIER_ITEMS } from '$lib/shop';
     import { onMount, onDestroy } from 'svelte';
-    import { gameStore } from '$lib/store.svelte';
+    import { gameStore, uiStore } from '$lib/store.svelte';
     import { Button } from 'm3-svelte';
 
     let papers = $state(0);
@@ -227,9 +227,11 @@
             </div>
         </div>
         <div class="justify-center flex flex-col neg-margin-top">
-            <h1 class="text-on-surface-variant text-lg">
-                {Math.round(currentPapersPerSecond)} papers/s
-            </h1>
+            {#if uiStore.showPapersPerSecond}
+                <h1 class="text-on-surface-variant text-lg">
+                    {Math.round(currentPapersPerSecond)} papers/s
+                </h1>
+            {/if}
             {#if purchasedMultipliers.length > 0}
                 <div class="mt-4 text-center">
                     <h2 class="text-on-surface-variant text-sm mb-2">Active Multipliers:</h2>
