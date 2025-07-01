@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SplitButton, SliderTicks, Button, Menu, MenuItem } from "m3-svelte";
+	import { SplitButton, SliderTicks, Button, Menu, MenuItem, Snackbar } from "m3-svelte";
 	import Task from "$lib/components/Task.svelte";
     import TaskList from "$lib/components/TaskList.svelte";
     import type { Task as TaskType, TaskList as TaskListType, ListItem as ListItemType } from "$lib/types";
@@ -10,7 +10,7 @@
     let showCreateTaskModal = $state(false);
     let showCreateListModal = $state(false);
     let storesReady = $state(false);
-
+    let snackbar: ReturnType<typeof Snackbar>;
     let points = $state(0);
 
     let showFilterMenu = $state(false);
@@ -53,7 +53,10 @@
             gameStore.setPoints(0);
             points = 0;
             gameStore.addTasks(1);
-            sliderValue = 0;
+            snackbar?.show({ 
+                message: "🎉 Reward earned! (1 Task)", 
+                closable: true 
+            });
         }
     });
     
@@ -72,6 +75,7 @@
     async function handleComplete(task: TaskType) {
         await taskStore.complete(task.id);
         await gameStore.addPoints(task.reward);
+        points = await gameStore.getPoints();
     }
 
     async function handleDelete(task: TaskType) {
@@ -155,6 +159,8 @@
 
     async function handleTaskListComplete(taskList: TaskListType) {
         await taskListStore.complete(taskList.id);
+        await gameStore.addPoints(taskList.reward);
+        points = await gameStore.getPoints();
     }
 
     async function handleTaskListDelete(taskList: TaskListType) {
@@ -496,6 +502,8 @@
         </div>
     </div>
 {/if}
+
+<Snackbar bind:this={snackbar} />
 
 <style>
     .big-split-button :global(button) {
